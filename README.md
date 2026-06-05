@@ -1,129 +1,115 @@
 # AI Resume Screener
 
-Upload multiple PDF resumes and a job description — get ranked candidates with match scores, charts, and a downloadable PDF report.
+An intelligent resume screening web application that ranks candidates against job descriptions using skill matching and optional AI analysis.
 
-Built by **Sai Jahnavi Madana** · NIT Warangal
+**Built by [Sai Jahnavi Madana](https://www.linkedin.com/in/sai-jahnavi-madana-36a491341/) · NIT Warangal**
+
+🔗 **Live Demo:** https://ai-resume-screener-zdls.onrender.com/
+
+---
+
+## Overview
+
+AI Resume Screener helps recruiters and hiring managers quickly rank candidates by analyzing resumes against job descriptions. It works instantly without any API key using local skill matching, with optional OpenAI GPT-4o integration for deeper AI analysis.
+
+---
 
 ## Features
 
-- Multiple PDF resume upload
-- **Local matching** (no API key required) — skill/keyword based ranking
-- Optional **OpenAI AI mode** (bring your own API key)
-- Guest trial: **2 free screenings**, then sign up required
-- User accounts with **email verification** (6-digit code sent to inbox)
-- Screening history and notes for verified users
-- Clean black-and-white PDF export
+- 📄 Upload multiple PDF resumes and rank instantly
+- 🤖 Optional AI analysis using OpenAI GPT-4o
+- 🔐 User authentication with email verification
+- 📊 Score visualization chart
+- 📋 Screening history saved per user
+- 📝 Candidate notes per screening
+- 📥 PDF report download
+- 🌙 Dark and light mode
+- 🎯 Job description templates
+- 👤 Guest trial — 2 free screenings before sign up
 
-## Tech stack
+---
 
-- Python · Flask · SQLite · ReportLab · Matplotlib
-- HTML/CSS/JavaScript frontend
+## Tech Stack
 
-## Local setup
+| Layer | Technology |
+|---|---|
+| Backend | Python, Flask |
+| Database | SQLite (local) / PostgreSQL (production) |
+| AI | OpenAI GPT-4o (optional) |
+| PDF Processing | PyPDF2, ReportLab |
+| Charts | Matplotlib |
+| Frontend | HTML, CSS, JavaScript |
+| Deployment | Render |
 
-### 1. Clone and install
+---
 
+## Screenshots
+
+> Add screenshots here after taking them!
+
+---
+
+## Setup & Installation
+
+**1. Clone the repo**
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-resume-screener.git
+git clone https://github.com/sai-jahnavi-madana/ai-resume-screener.git
 cd ai-resume-screener
-python -m venv venv
 ```
 
-**Windows (PowerShell):**
-
-```powershell
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-**macOS / Linux:**
-
+**2. Install dependencies**
 ```bash
-source venv/bin/activate
-pip install -r requirements.txt
-```
+pip install flask flask-sqlalchemy werkzeug python-dotenv openai pypdf2 reportlab matplotlib
 
-### 2. Environment variables
+SECRET_KEY=your-secret-key
+OPENAI_API_KEY=sk-...
+FLASK_DEBUG=true
 
-```bash
-copy .env.example .env
-```
-
-Edit `.env` and set a strong `SECRET_KEY`:
-
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"
-```
-
-Paste the output as `SECRET_KEY` in `.env`.
-
-### Email verification (optional for local dev)
-
-To send real verification emails, add Gmail SMTP settings to `.env`:
-
-```env
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your.email@gmail.com
-MAIL_PASSWORD=your-16-char-app-password
-MAIL_FROM=your.email@gmail.com
-```
-
-Gmail: Google Account → Security → 2-Step Verification → **App passwords** → create one for “Mail”.
-
-**Without SMTP:** codes print in the terminal where `python app.py` runs (dev only).
-
-> **Never commit `.env` to GitHub.** It is listed in `.gitignore`.
-
-### 3. Run
-
+**4. Run**
 ```bash
 python app.py
 ```
 
-Open [http://127.0.0.1:5000](http://127.0.0.1:5000)
+Open `http://localhost:5000`
 
-## Deploy on Render (free tier)
+---
 
-1. Push this project to a **GitHub** repository (without `.env`).
-2. Go to [render.com](https://render.com) → **New** → **Blueprint** (or **Web Service**).
-3. Connect your GitHub repo.
-4. If using **Blueprint**, Render reads `render.yaml` automatically.
-5. If manual **Web Service**:
-   - **Build command:** `pip install -r requirements.txt`
-   - **Start command:** `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120`
-   - **Health check path:** `/health`
-6. Add environment variables in Render dashboard:
-   - `SECRET_KEY` — generate a random string (required)
-   - `FLASK_DEBUG` = `false`
-   - `FLASK_ENV` = `production`
-7. Deploy. Your live URL will look like `https://ai-resume-screener.onrender.com`.
+## How It Works
 
-### Notes for production
+1. User uploads PDF resumes
+2. User pastes job description
+3. App extracts text from PDFs
+4. Local skill matching ranks candidates instantly
+5. Optional OpenAI GPT-4o for deeper analysis
+6. Results shown with score chart and PDF report
 
-- SQLite data on Render’s free tier may reset on redeploy. For persistent data, add a free PostgreSQL database on Render and set `DATABASE_URL` in environment variables.
-- OpenAI is optional; most users can use local matching without any API key.
+---
 
-## Project structure
+## Data Storage
 
+| Data | Where Stored |
+|---|---|
+| User accounts | SQLite / PostgreSQL database |
+| Screening history | Database per user |
+| Candidate notes | Database per screening |
+| PDF reports | Generated on the fly |
+| API key | Browser only, never on server |
+
+---
+
+## Deployment
+
+Deployed on **Render** — [Live Demo](https://ai-resume-screener-zdls.onrender.com/)
+
+---
+
+## About
+
+Built by **Sai Jahnavi Madana**
+- 🎓 B.Tech CSE @ Adikavi Nannaya University (2027)
+- 🔬 AI/ML Research Intern @ NIT Warangal
+- 💼 [LinkedIn](https://www.linkedin.com/in/sai-jahnavi-madana-36a491341/)
+- 💻 [GitHub](https://github.com/sai-jahnavi-madana)
 ```
-ai-resume-screener/
-├── app.py              # Flask backend
-├── templates/
-│   └── index.html      # Frontend UI
-├── requirements.txt
-├── Procfile            # For Render / Railway / Heroku
-├── render.yaml         # Render Blueprint
-├── .env.example        # Copy to .env locally
-└── README.md
-```
 
-## Security checklist before GitHub push
-
-- [ ] `.env` is **not** in the repo (only `.env.example`)
-- [ ] `SECRET_KEY` is set in `.env` locally and in Render dashboard for production
-- [ ] No real API keys in committed files
-
-## License
-
-MIT — free to use for learning and portfolio projects.
+**3. Create `.env` file**
