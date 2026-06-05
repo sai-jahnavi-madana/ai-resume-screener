@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Resume Screener | Sai Jahnavi Madana</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1f2d47;
+    --accent: #3dd6ac;
+    --accent-hover: #2fcf9f;
+    --accent2: #5b9cf6;
+    --accent3: #f97e72;
+    --accent4: #fbbf24;
+    --text: #e8edf5;
+    --text2: #8a9ab8;
+    --text3: #4a5a78;
+    --on-accent: #0a0f1e;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-lg: rgba(0, 0, 0, 0.35);
+    --overlay: rgba(10, 15, 30, 0.85);
+    --glow-1: rgba(61, 214, 172, 0.07);
+    --glow-2: rgba(91, 156, 246, 0.07);
+    --chip-bg: rgba(61, 214, 172, 0.1);
+    --chip-border: rgba(61, 214, 172, 0.3);
+    --banner-bg: rgba(91, 156, 246, 0.08);
+    --banner-border: rgba(91, 156, 246, 0.2);
+    --tag-match-bg: rgba(61, 214, 172, 0.12);
+    --tag-miss-bg: rgba(249, 126, 114, 0.12);
+    --upload-hover: rgba(61, 214, 172, 0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, var(--glow-1) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, var(--glow-2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .app { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+  /* NAVBAR */
+  .navbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; flex-wrap: wrap; gap: 12px; }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 20px; letter-spacing: -0.3px; }
+  .nav-logo span { color: var(--accent); font-style: italic; }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-user { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; padding: 6px 16px 6px 8px; }
+  .nav-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--on-accent); }
+  .nav-name { font-size: 13px; font-weight: 500; }
+  .btn-nav { padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+  .btn-nav.outline { background: none; border: 1px solid var(--border); color: var(--text2); }
+  .btn-nav.outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-nav.primary { background: var(--accent); color: var(--on-accent); }
+  .btn-nav.primary:hover { background: var(--accent-hover); }
+  .btn-nav.danger { background: none; border: 1px solid rgba(249,126,114,0.3); color: var(--accent3); }
+  .btn-nav.danger:hover { background: rgba(249,126,114,0.1); }
+
+  /* AUTH MODAL */
+  .modal-overlay { position: fixed; inset: 0; z-index: 100; background: var(--overlay); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 36px; width: 100%; max-width: 400px; box-shadow: 0 24px 64px var(--shadow-lg); }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 24px; }
+  .modal-tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 10px; padding: 4px; margin-bottom: 24px; border: 1px solid var(--border); }
+  .modal-tab { flex: 1; padding: 8px; border: none; background: none; color: var(--text2); border-radius: 7px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+  .modal-tab.active { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .modal-form { display: flex; flex-direction: column; gap: 14px; }
+  .modal-field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+  .modal-field input { width: 100%; padding: 11px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .modal-field input:focus { border-color: var(--accent); }
+  .modal-submit { width: 100%; padding: 12px; background: var(--accent); color: var(--on-accent); border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 4px; }
+  .modal-submit:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .modal-error { color: var(--accent3); font-size: 12px; text-align: center; display: none; padding: 8px; background: rgba(249,126,114,0.1); border-radius: 8px; }
+  .modal-close { width: 100%; padding: 10px; background: none; border: 1px solid var(--border); color: var(--text2); border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+  .modal-close:hover { color: var(--text); }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 48px; }
+  .header h1 { font-family: 'Playfair Display', serif; font-size: clamp(40px, 6vw, 68px); letter-spacing: -1px; margin-bottom: 12px; line-height: 1.1; }
+  .header h1 span { color: var(--accent); font-style: italic; }
+  .header p { font-size: 16px; color: var(--text2); max-width: 500px; margin: 0 auto; }
+
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 28px; margin-bottom: 24px; box-shadow: 0 8px 32px var(--shadow); }
+  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); margin-bottom: 16px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media(max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* INPUTS */
+  label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+  textarea { width: 100%; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; resize: vertical; min-height: 180px; line-height: 1.6; }
+  textarea:focus { border-color: var(--accent); }
+  .form-input { width: 100%; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--accent); }
+  .api-config-card label { margin-top: 4px; color: var(--text); font-size: 14px; }
+  .api-config-card .form-input { margin-bottom: 10px; }
+  .api-toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; }
+  .api-toggle-row input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .api-toggle-label { font-size: 14px; color: var(--text); font-weight: 500; margin: 0; }
+  .api-fields { display: none; }
+  .api-fields.show { display: block; }
+  .mode-badge { font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 100px; }
+  .mode-badge.local { background: rgba(91,156,246,0.15); color: var(--accent2); border: 1px solid rgba(91,156,246,0.3); }
+  .mode-badge.ai { background: rgba(61,214,172,0.15); color: var(--accent); border: 1px solid rgba(61,214,172,0.3); }
+  .api-key-hint { font-size: 13px; color: var(--text2); margin: 0; line-height: 1.5; }
+  .api-key-hint a { color: var(--accent2); text-decoration: none; font-weight: 500; }
+  .api-key-hint a:hover { text-decoration: underline; }
+
+  /* TEMPLATES */
+  .template-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .template-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .template-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* UPLOAD */
+  .upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+  .upload-area:hover, .upload-area.dragover { border-color: var(--accent); background: var(--upload-hover); }
+  .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+  .upload-icon { font-size: 28px; color: var(--accent); }
+  .upload-text { font-size: 14px; font-weight: 500; color: var(--text2); }
+  .upload-sub { font-size: 12px; color: var(--text3); }
+  .file-list { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .file-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 100px; padding: 4px 10px 4px 12px; font-size: 12px; color: var(--accent); font-weight: 500; }
+  .file-chip-remove { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; opacity: 0.7; }
+  .file-chip-remove:hover { opacity: 1; }
+
+  /* BUTTON */
+  .btn-screen { width: 100%; padding: 16px; background: var(--accent); color: var(--on-accent); border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 20px var(--chip-border); letter-spacing: 0.5px; }
+  .btn-screen:hover { background: var(--accent-hover); transform: translateY(-2px); }
+  .btn-screen:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* LOADING */
+  .loading { display: none; text-align: center; padding: 40px; }
+  .loading.show { display: block; }
+  .spinner { width: 48px; height: 48px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--accent); animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 15px; color: var(--text2); }
+  .loading-sub { font-size: 13px; color: var(--text3); margin-top: 6px; }
+
+  /* RESULTS */
+  .results { display: none; }
+  .results.show { display: block; }
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .results-title { font-family: 'Playfair Display', serif; font-size: 28px; }
+  .results-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .results-count { background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; padding: 6px 16px; font-size: 13px; color: var(--text2); }
+  .btn-export { padding: 8px 20px; background: var(--accent2); color: white; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-export:hover { background: #4a8ae8; transform: translateY(-1px); }
+
+  /* CHART */
+  .chart-wrap { margin-bottom: 24px; }
+  .chart-img { width: 100%; border-radius: 12px; }
+
+  /* RANK CARD */
+  .rank-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; position: relative; overflow: hidden; transition: all 0.2s; animation: fadeUp 0.4s ease forwards; opacity: 0; }
+  .rank-card:hover { border-color: var(--accent2); transform: translateY(-2px); box-shadow: 0 12px 32px var(--shadow-lg); }
+  .rank-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; }
+  .rank-card.rank-1::before { background: var(--accent4); }
+  .rank-card.rank-2::before { background: var(--text2); }
+  .rank-card.rank-3::before { background: #cd7f32; }
+  .rank-card.rank-other::before { background: var(--border); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  .rank-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .rank-medal { font-size: 32px; line-height: 1; }
+  .rank-info { flex: 1; }
+  .rank-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .rank-summary { font-size: 13px; color: var(--text2); }
+  .rank-score-wrap { text-align: right; }
+  .rank-score { font-family: 'Playfair Display', serif; font-size: 40px; line-height: 1; }
+  .rank-score.high { color: var(--accent); }
+  .rank-score.mid { color: var(--accent4); }
+  .rank-score.low { color: var(--accent3); }
+  .rank-score-label { font-size: 11px; color: var(--text3); }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin: 12px 0; }
+  .progress-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1s ease; }
+  .rank-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .detail-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .detail-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .detail-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 100px; }
+  .tag.match { background: var(--tag-match-bg); color: var(--accent); }
+  .tag.missing { background: var(--tag-miss-bg); color: var(--accent3); }
+
+  /* NOTES */
+  .note-area { margin-top: 14px; }
+  .note-input { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; resize: none; min-height: 60px; transition: border-color 0.2s; }
+  .note-input:focus { border-color: var(--accent2); }
+  .note-save { margin-top: 6px; padding: 6px 16px; background: none; border: 1px solid var(--accent2); color: var(--accent2); border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .note-save:hover { background: rgba(91,156,246,0.1); }
+  .note-saved { font-size: 11px; color: var(--accent); display: none; margin-top: 4px; }
+
+  /* HISTORY */
+  .history-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+  .history-item:hover { border-color: var(--accent2); }
+  .history-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .history-date { font-size: 12px; color: var(--text3); }
+  .history-count { font-size: 12px; color: var(--accent); font-weight: 600; }
+  .history-desc { font-size: 13px; color: var(--text2); margin-top: 6px; }
+  .search-input { width: 100%; padding: 10px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; margin-bottom: 16px; }
+  .search-input:focus { border-color: var(--accent); }
+
+  /* LOGIN BANNER */
+  .login-banner { background: var(--banner-bg); border: 1px solid var(--banner-border); border-radius: 12px; padding: 14px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .login-banner-text { font-size: 14px; color: var(--text2); }
+  .login-banner-text span { color: var(--accent2); font-weight: 600; }
+
+  /* ERROR */
+  .error-box { background: rgba(249,126,114,0.1); border: 1px solid rgba(249,126,114,0.3); border-radius: 12px; padding: 16px 20px; color: var(--accent3); font-size: 14px; display: none; margin-bottom: 16px; }
+  .error-box.show { display: block; }
+  .warn-box { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.35); border-radius: 12px; padding: 14px 20px; color: var(--accent4); font-size: 14px; display: none; margin-bottom: 16px; }
+  .warn-box.show { display: block; }
+
+  /* THEME */
+  .theme-toggle { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; cursor: pointer; color: var(--text2); font-size: 16px; transition: all 0.2s; box-shadow: 0 1px 3px var(--shadow); }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  body.light {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #f8fafc;
+    --border: #d8e0ea;
+    --accent: #0d9488;
+    --accent-hover: #0f766e;
+    --accent2: #2563eb;
+    --accent3: #dc2626;
+    --accent4: #b45309;
+    --text: #0f172a;
+    --text2: #475569;
+    --text3: #64748b;
+    --on-accent: #ffffff;
+    --shadow: rgba(15, 23, 42, 0.06);
+    --shadow-lg: rgba(15, 23, 42, 0.1);
+    --overlay: rgba(15, 23, 42, 0.45);
+    --glow-1: rgba(13, 148, 136, 0.12);
+    --glow-2: rgba(37, 99, 235, 0.1);
+    --chip-bg: rgba(13, 148, 136, 0.1);
+    --chip-border: rgba(13, 148, 136, 0.28);
+    --banner-bg: rgba(37, 99, 235, 0.08);
+    --banner-border: rgba(37, 99, 235, 0.22);
+    --tag-match-bg: rgba(13, 148, 136, 0.12);
+    --tag-miss-bg: rgba(220, 38, 38, 0.1);
+    --upload-hover: rgba(13, 148, 136, 0.06);
+  }
+
+  body.light .card {
+    box-shadow: 0 4px 24px var(--shadow), 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  body.light .rank-card {
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+
+  body.light .mode-badge.local {
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
+    border-color: rgba(37, 99, 235, 0.25);
+  }
+
+  body.light .mode-badge.ai {
+    background: rgba(13, 148, 136, 0.1);
+    color: #0f766e;
+    border-color: rgba(13, 148, 136, 0.25);
+  }
+
+  body.light .warn-box {
+    background: rgba(180, 83, 9, 0.08);
+    border-color: rgba(180, 83, 9, 0.25);
+    color: #b45309;
+  }
+
+  body.light .error-box {
+    background: rgba(220, 38, 38, 0.06);
+    border-color: rgba(220, 38, 38, 0.2);
+    color: #b91c1c;
+  }
+
+  body.light .chart-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+  }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 40px 0 20px; color: var(--text3); font-size: 13px; }
+  .footer a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="app" id="appRoot" data-guest-limit="{{ guest_attempts_limit|default(2) }}">
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">Welcome back</div>
+      <div class="modal-tabs" id="authTabs">
+        <button class="modal-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="modal-tab" onclick="switchAuthTab('register')">Register</button>
+      </div>
+      <div class="modal-error" id="authError"></div>
+      <div class="modal-error" id="authSuccess" style="display:none;background:rgba(61,214,172,0.1);color:var(--accent);"></div>
+      <div id="loginForm" class="modal-form">
+        <div class="modal-field"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
+        <div class="modal-field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="modal-submit" onclick="doLogin()">Sign In</button>
+        <button class="modal-close" onclick="closeModal()">Cancel</button>
+      </div>
+      <div id="registerForm" class="modal-form" style="display:none;">
+        <div class="modal-field"><label>Full Name</label><input type="text" id="regName" placeholder="Your name"></div>
+        <div class="modal-field"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com"></div>
+        <div class="modal-field"><label>Password</label><input type="password" id="regPass" placeholder="Min 6 characters"></div>
+        <button class="modal-submit" onclick="doRegister()">Create Account</button>
+        <button class="modal-close" onclick="closeModal()">Cancel</button>
+      </div>
+      <div id="verifyForm" class="modal-form" style="display:none;">
+        <p class="api-key-hint" id="verifyHint" style="margin-bottom:14px;">Enter the 6-digit code sent to your email.</p>
+        <div class="modal-field">
+          <label>Verification code</label>
+          <input type="text" id="verifyCode" class="form-input" placeholder="123456" maxlength="6" inputmode="numeric" autocomplete="one-time-code" onkeydown="if(event.key==='Enter')doVerifyEmail()">
+        </div>
+        <button class="modal-submit" onclick="doVerifyEmail()">Verify Email</button>
+        <button class="modal-close" type="button" onclick="resendVerification()">Resend code</button>
+        <button class="modal-close" type="button" onclick="switchAuthTab('login')">Back to Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="nav-logo">AI <span>Resume</span> Screener</div>
+    <div class="nav-right" id="navRight">
+      <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+      <button class="btn-nav outline" onclick="openModal('login')">Sign In</button>
+      <button class="btn-nav primary" onclick="openModal('register')">Register</button>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>AI <span>Resume</span> Screener</h1>
+    <p>Upload resumes and a job description — ranks the best candidates instantly</p>
+  </div>
+
+  <!-- LOGIN / TRIAL BANNER -->
+  <div class="login-banner" id="loginBanner">
+    <div class="login-banner-text" id="loginBannerText">
+      <span id="trialCount">2</span> free screenings left — then <span>sign up</span> to continue
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-nav outline" onclick="openModal('login')">Sign In</button>
+      <button class="btn-nav primary" onclick="openModal('register')">Register</button>
+    </div>
+  </div>
+
+  <!-- API CONFIGURATION (optional) -->
+  <div class="card api-config-card">
+    <div class="card-title">API Configuration</div>
+    <p class="api-key-hint" style="margin-bottom:14px;">
+      Screening works <strong style="color:var(--text);">without any API key</strong> using local skill matching.
+      Enable AI below only if you want smarter OpenAI analysis (uses your own key &amp; credits).
+    </p>
+    <label class="api-toggle-row">
+      <input type="checkbox" id="useAi" onchange="toggleAiFields()">
+      <span class="api-toggle-label">Use AI screening (OpenAI — optional)</span>
+    </label>
+    <div class="api-fields" id="apiFields">
+      <label for="apiKey">OpenAI API Key</label>
+      <input type="password" id="apiKey" class="form-input" placeholder="sk-..." autocomplete="off">
+      <p class="api-key-hint">
+        <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">Get your API key →</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- MAIN FORM -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Job Description</div>
+      <div class="template-grid">
+        <button class="template-btn" onclick="loadTemplate('python')">Python Dev</button>
+        <button class="template-btn" onclick="loadTemplate('ml')">ML Engineer</button>
+        <button class="template-btn" onclick="loadTemplate('frontend')">Frontend Dev</button>
+        <button class="template-btn" onclick="loadTemplate('data')">Data Analyst</button>
+      </div>
+      <textarea id="jobDesc" placeholder="Paste the full job description or use a template above..."></textarea>
+    </div>
+    <div class="card">
+      <div class="card-title">Upload Resumes</div>
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="fileInput" multiple accept=".pdf" onchange="handleFiles(this.files)">
+        <div class="upload-icon">↑</div>
+        <div class="upload-text">Drag & drop PDFs here</div>
+        <div class="upload-sub">or click to browse · Multiple files supported</div>
+      </div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+  </div>
+
+  <!-- ERROR / WARNING -->
+  <div class="warn-box" id="warnBox"></div>
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- BUTTON -->
+  <button class="btn-screen" id="screenBtn" onclick="screenResumes()">Screen Resumes</button>
+
+  <!-- LOADING -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Analyzing resumes...</div>
+    <div class="loading-sub" id="loadingSub">Usually a few seconds (no API key needed)</div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="results-header">
+      <div class="results-title">Ranking Results</div>
+      <div class="results-actions">
+        <span class="mode-badge local" id="modeBadge" style="display:none;"></span>
+        <div class="results-count" id="resultsCount"></div>
+        <button class="btn-export" onclick="exportPDF()">Download PDF Report</button>
+      </div>
+    </div>
+    <div class="chart-wrap card" id="chartWrap" style="display:none;">
+      <div class="card-title">Score Chart</div>
+      <img id="chartImg" class="chart-img" src="" alt="Score Chart">
+    </div>
+    <div id="resultsList"></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="historySection" style="display:none;">
+    <div class="card">
+      <div class="card-title">Past Screenings</div>
+      <input type="text" class="search-input" id="historySearch" placeholder="Search past screenings..." oninput="filterHistory()">
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <a href="https://www.linkedin.com/in/sai-jahnavi-madana-36a491341/" target="_blank">Sai Jahnavi Madana</a> · NIT Warangal
+  </div>
+
+</div>
+
+<script>
+  let selectedFiles = [];
+  let currentUser = null;
+  let currentResults = [];
+  let currentJobDesc = '';
+  let currentScreeningId = null;
+  let allHistory = [];
+  const GUEST_ATTEMPT_LIMIT = parseInt(document.getElementById('appRoot').dataset.guestLimit || '2', 10);
+  let guestAttemptsRemaining = GUEST_ATTEMPT_LIMIT;
+  let pendingVerifyEmail = '';
+
+  // THEME
+  function themeIcon() {
+    return document.body.classList.contains('light') ? '🌙' : '☀️';
+  }
+  function syncThemeToggles() {
+    document.querySelectorAll('.theme-toggle').forEach(btn => { btn.textContent = themeIcon(); });
+  }
+  function toggleTheme() {
+    document.body.classList.toggle('light');
+    localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    syncThemeToggles();
+  }
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light');
+    syncThemeToggles();
+  }
+
+  function toggleAiFields() {
+    const on = document.getElementById('useAi').checked;
+    document.getElementById('apiFields').classList.toggle('show', on);
+    localStorage.setItem('use_ai', on ? '1' : '0');
+  }
+
+  const apiKeyInput = document.getElementById('apiKey');
+  const useAiCheckbox = document.getElementById('useAi');
+  if (localStorage.getItem('openai_api_key')) apiKeyInput.value = localStorage.getItem('openai_api_key');
+  // Always start in free local mode (no OpenAI)
+  useAiCheckbox.checked = false;
+  toggleAiFields();
+  apiKeyInput.addEventListener('change', () => {
+    const key = apiKeyInput.value.trim();
+    if (key) localStorage.setItem('openai_api_key', key);
+    else localStorage.removeItem('openai_api_key');
+  });
+
+  // TEMPLATES
+  const templates = {
+    python: `We are looking for a Python Developer with 2+ years of experience.\nRequirements:\n- Strong Python programming skills\n- Experience with Flask or Django\n- REST APIs and SQL databases\n- Git version control`,
+    ml: `We are looking for an ML Engineer.\nRequirements:\n- Python, TensorFlow or PyTorch\n- Machine Learning algorithms\n- Data preprocessing and analysis\n- NLP or Computer Vision experience\n- Model deployment`,
+    frontend: `We are looking for a Frontend Developer.\nRequirements:\n- HTML, CSS, JavaScript\n- React or Vue.js\n- Responsive design\n- REST API integration\n- Git version control`,
+    data: `We are looking for a Data Analyst.\nRequirements:\n- Python or R programming\n- SQL and database querying\n- Data visualization (Tableau, Power BI)\n- Statistical analysis`
+  };
+
+  function loadTemplate(type) { document.getElementById('jobDesc').value = templates[type]; }
+
+  function updateGuestBanner(remaining) {
+    if (currentUser) return;
+    guestAttemptsRemaining = remaining;
+    const banner = document.getElementById('loginBanner');
+    const text = document.getElementById('loginBannerText');
+    banner.style.display = 'flex';
+    if (remaining === null || remaining === undefined) {
+      text.innerHTML = '<span>Sign in</span> for unlimited screenings and saved history';
+      return;
+    }
+    if (remaining <= 0) {
+      text.innerHTML = 'Free trial ended — <span>register or sign in</span> to screen more resumes';
+      return;
+    }
+    text.innerHTML = `<span>${remaining}</span> free screening${remaining > 1 ? 's' : ''} left — then <span>sign up</span> to continue`;
+  }
+
+  async function refreshGuestStatus() {
+    try {
+      const res = await fetch('/guest_status');
+      const data = await res.json();
+      if (data.logged_in && data.name) {
+        setLoggedIn(data.name);
+        return;
+      }
+      updateGuestBanner(data.attempts_remaining);
+    } catch (e) {}
+  }
+
+  refreshGuestStatus();
+
+  // AUTH
+  function openModal(tab) { document.getElementById('authModal').classList.add('show'); switchAuthTab(tab); }
+  function closeModal() { document.getElementById('authModal').classList.remove('show'); document.getElementById('authError').style.display='none'; }
+
+  function switchAuthTab(tab) {
+    document.getElementById('authTabs').style.display = 'flex';
+    document.getElementById('verifyForm').style.display = 'none';
+    document.querySelectorAll('.modal-tab').forEach((t,i) => t.classList.toggle('active', ['login','register'][i]===tab));
+    document.getElementById('loginForm').style.display = tab==='login'?'flex':'none';
+    document.getElementById('registerForm').style.display = tab==='register'?'flex':'none';
+    document.getElementById('modalTitle').textContent = tab==='login'?'Welcome back':'Create account';
+    document.getElementById('authError').style.display='none';
+    document.getElementById('authSuccess').style.display='none';
+  }
+
+  function showVerifyForm(email, message, devCode) {
+    pendingVerifyEmail = email;
+    document.getElementById('authTabs').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('verifyForm').style.display = 'flex';
+    document.getElementById('modalTitle').textContent = 'Verify your email';
+    let hint = message || `Enter the 6-digit code sent to ${email}`;
+    if (devCode) hint += ` (Dev code: ${devCode})`;
+    document.getElementById('verifyHint').textContent = hint;
+    document.getElementById('verifyCode').value = '';
+    document.getElementById('authError').style.display = 'none';
+    document.getElementById('authSuccess').style.display = 'none';
+    document.getElementById('authModal').classList.add('show');
+  }
+
+  async function doVerifyEmail() {
+    const code = document.getElementById('verifyCode').value.trim();
+    const err = document.getElementById('authError');
+    const ok = document.getElementById('authSuccess');
+    if (!pendingVerifyEmail || code.length < 6) {
+      err.textContent = 'Enter the 6-digit code from your email';
+      err.style.display = 'block';
+      return;
+    }
+    try {
+      const res = await fetch('/verify_email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pendingVerifyEmail, code }),
+      });
+      const data = await res.json();
+      if (data.error) { err.textContent = data.error; err.style.display = 'block'; ok.style.display = 'none'; return; }
+      setLoggedIn(data.name);
+      pendingVerifyEmail = '';
+      closeModal();
+      refreshGuestStatus();
+    } catch (e) { err.textContent = 'Connection error'; err.style.display = 'block'; }
+  }
+
+  async function resendVerification() {
+    if (!pendingVerifyEmail) return;
+    const err = document.getElementById('authError');
+    const ok = document.getElementById('authSuccess');
+    try {
+      const res = await fetch('/resend_verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: pendingVerifyEmail }),
+      });
+      const data = await res.json();
+      if (data.error) { err.textContent = data.error; err.style.display = 'block'; return; }
+      let msg = data.message || 'New code sent.';
+      if (data.dev_code) msg += ` Dev code: ${data.dev_code}`;
+      ok.textContent = msg;
+      ok.style.display = 'block';
+      err.style.display = 'none';
+    } catch (e) { err.textContent = 'Connection error'; err.style.display = 'block'; }
+  }
+
+  async function doLogin() {
+    const email=document.getElementById('loginEmail').value.trim();
+    const password=document.getElementById('loginPass').value;
+    const err=document.getElementById('authError');
+    try {
+      const res=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+      const data=await res.json();
+      if (data.verification_required) {
+        showVerifyForm(data.email, data.error || data.message, data.dev_code);
+        return;
+      }
+      if(data.error){err.textContent=data.error;err.style.display='block';return;}
+      setLoggedIn(data.name);closeModal();refreshGuestStatus();
+    } catch(e){err.textContent='Connection error';err.style.display='block';}
+  }
+
+  async function doRegister() {
+    const name=document.getElementById('regName').value.trim();
+    const email=document.getElementById('regEmail').value.trim();
+    const password=document.getElementById('regPass').value;
+    const err=document.getElementById('authError');
+    try {
+      const res=await fetch('/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
+      const data=await res.json();
+      if (data.verification_required) {
+        showVerifyForm(data.email, data.message, data.dev_code);
+        return;
+      }
+      if(data.error){err.textContent=data.error;err.style.display='block';return;}
+      setLoggedIn(data.name);closeModal();refreshGuestStatus();
+    } catch(e){err.textContent='Connection error';err.style.display='block';}
+  }
+
+  function handleSignupRequired(data) {
+    showError(data.error || 'Please sign up to continue.');
+    updateGuestBanner(0);
+    openModal('register');
+  }
+
+  function setLoggedIn(name) {
+    currentUser=name;
+    const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('navRight').innerHTML=`
+      <button class="theme-toggle" onclick="toggleTheme()">${themeIcon()}</button>
+      <div class="nav-user"><div class="nav-avatar">${initials}</div><div class="nav-name">${name.split(' ')[0]}</div></div>
+      <button class="btn-nav danger" onclick="doLogout()">Sign Out</button>`;
+    document.getElementById('loginBanner').style.display='none';
+    guestAttemptsRemaining = null;
+    loadHistory();
+  }
+
+  async function doLogout() {
+    await fetch('/logout');
+    currentUser=null;
+    document.getElementById('navRight').innerHTML=`
+      <button class="theme-toggle" onclick="toggleTheme()">${themeIcon()}</button>
+      <button class="btn-nav outline" onclick="openModal('login')">Sign In</button>
+      <button class="btn-nav primary" onclick="openModal('register')">Register</button>`;
+    document.getElementById('historySection').style.display='none';
+    refreshGuestStatus();
+  }
+
+  // HISTORY
+  async function loadHistory() {
+    try {
+      const res=await fetch('/history');
+      const data=await res.json();
+      if(data.error||!data.history.length) return;
+      allHistory=data.history;
+      document.getElementById('historySection').style.display='block';
+      renderHistory(allHistory);
+    } catch(e){}
+  }
+
+  function renderHistory(items) {
+    document.getElementById('historyList').innerHTML=items.length?items.map(h=>`
+      <div class="history-item" onclick="showHistoryResults(${JSON.stringify(h.results).replace(/"/g,'&quot;')},'${h.job_desc}')">
+        <div class="history-header">
+          <div class="history-date">${h.created_at}</div>
+          <div class="history-count">${h.total_resumes} resume${h.total_resumes>1?'s':''}</div>
+        </div>
+        <div class="history-desc">${h.job_desc}</div>
+      </div>`).join(''):'<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px;">No results found</div>';
+  }
+
+  function filterHistory() {
+    const q=document.getElementById('historySearch').value.toLowerCase();
+    renderHistory(allHistory.filter(h=>h.job_desc.toLowerCase().includes(q)));
+  }
+
+  function showHistoryResults(results,jobDesc) {
+    currentResults=results;currentJobDesc=jobDesc;
+    renderResults(results,null,'local');
+    document.getElementById('results').scrollIntoView({behavior:'smooth'});
+  }
+
+  // UPLOAD
+  const uploadArea=document.getElementById('uploadArea');
+  uploadArea.addEventListener('dragover',(e)=>{e.preventDefault();uploadArea.classList.add('dragover');});
+  uploadArea.addEventListener('dragleave',()=>uploadArea.classList.remove('dragover'));
+  uploadArea.addEventListener('drop',(e)=>{e.preventDefault();uploadArea.classList.remove('dragover');handleFiles(e.dataTransfer.files);});
+
+  function fileKey(f) { return `${f.name}|${f.size}|${f.lastModified}`; }
+
+  function handleFiles(files) {
+    const incoming = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+    const seen = new Set(selectedFiles.map(fileKey));
+    incoming.forEach(f => {
+      const key = fileKey(f);
+      if (!seen.has(key)) {
+        selectedFiles.push(f);
+        seen.add(key);
+      }
+    });
+    document.getElementById('fileInput').value = '';
+    renderFileList();
+  }
+
+  function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    renderFileList();
+  }
+
+  function renderFileList() {
+    const list = document.getElementById('fileList');
+    list.innerHTML = selectedFiles.map((f, i) => `
+      <div class="file-chip">
+        <span>${f.name}</span>
+        <button type="button" class="file-chip-remove" onclick="removeFile(${i})" title="Remove">×</button>
+      </div>`).join('');
+    const uploadText = document.querySelector('.upload-text');
+    uploadText.textContent = selectedFiles.length
+      ? `${selectedFiles.length} PDF${selectedFiles.length > 1 ? 's' : ''} ready`
+      : 'Drag & drop PDFs here';
+  }
+
+  // SCREEN
+  async function screenResumes() {
+    const jobDesc=document.getElementById('jobDesc').value.trim();
+    const errorBox=document.getElementById('errorBox');
+    errorBox.classList.remove('show');
+    document.getElementById('warnBox').classList.remove('show');
+    if(!jobDesc){showError('Please enter a job description');return;}
+    if(!selectedFiles.length){showError('Please upload at least one PDF resume');return;}
+    if(!currentUser && guestAttemptsRemaining !== null && guestAttemptsRemaining <= 0){
+      handleSignupRequired({error:'Free trial ended. Register or sign in to screen more resumes.'});
+      return;
+    }
+
+    document.getElementById('screenBtn').disabled=true;
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('results').classList.remove('show');
+
+    const useAi = useAiCheckbox.checked;
+    const apiKey = apiKeyInput.value.trim();
+    if (useAi && !apiKey) {
+      showError('AI mode is on — enter your OpenAI API key, or turn off "Use AI screening".');
+      document.getElementById('apiFields').classList.add('show');
+      apiKeyInput.focus();
+      document.getElementById('screenBtn').disabled = false;
+      document.getElementById('loading').classList.remove('show');
+      return;
+    }
+    if (useAi && apiKey) localStorage.setItem('openai_api_key', apiKey);
+
+    document.getElementById('loadingSub').textContent = useAi
+      ? 'AI analysis may take 10–20 seconds'
+      : 'Local matching — usually a few seconds';
+
+    const formData=new FormData();
+    formData.append('job_desc',jobDesc);
+    formData.append('use_ai', useAi ? '1' : '0');
+    if (useAi && apiKey) formData.append('openai_api_key', apiKey);
+    selectedFiles.forEach(f => formData.append('resumes', f, f.name));
+
+    try {
+      const response=await fetch('/screen',{method:'POST',body:formData});
+      const data=await response.json();
+      if(data.signup_required){handleSignupRequired(data);return;}
+      if(data.error){showError(data.error);return;}
+      if(data.attempts_remaining !== undefined && data.attempts_remaining !== null){
+        updateGuestBanner(data.attempts_remaining);
+      }
+      if(data.warning){
+        const w=document.getElementById('warnBox');
+        w.textContent='⚠️ '+data.warning;
+        w.classList.add('show');
+      }
+      currentResults=data.results;
+      currentJobDesc=jobDesc;
+      currentScreeningId=data.screening_id;
+      renderResults(data.results,data.chart,data.mode);
+      if(currentUser) loadHistory();
+    } catch(e){showError('Connection error.');}
+    finally{
+      document.getElementById('loading').classList.remove('show');
+      document.getElementById('screenBtn').disabled=false;
+    }
+  }
+
+  // RENDER RESULTS
+  function renderResults(results,chart,mode) {
+    const medals=['🥇','🥈','🥉'];
+    const rankClass=['rank-1','rank-2','rank-3'];
+    const modeLabel = mode === 'ai' ? 'AI analysis' : 'Local matching (no API key)';
+    const modeClass = mode === 'ai' ? 'mode-badge ai' : 'mode-badge local';
+    document.getElementById('resultsCount').innerHTML =
+      `<span class="${modeClass}">${modeLabel}</span> · ${results.length} candidate${results.length>1?'s':''} ranked`;
+
+    if(chart){
+      document.getElementById('chartImg').src=`data:image/png;base64,${chart}`;
+      document.getElementById('chartWrap').style.display='block';
+    }
+
+    document.getElementById('resultsList').innerHTML=results.map((c,i)=>{
+      const medal=i<3?medals[i]:`#${i+1}`;
+      const rClass=i<3?rankClass[i]:'rank-other';
+      const scoreClass=c.score>=70?'high':c.score>=50?'mid':'low';
+      const matches=c.matches.split(',').map(s=>`<span class="tag match">${s.trim()}</span>`).join('');
+      const missing=c.missing.split(',').map(s=>`<span class="tag missing">${s.trim()}</span>`).join('');
+      const key=c.name.replace('.pdf','');
+      return `
+        <div class="rank-card ${rClass}" style="animation-delay:${i*0.1}s">
+          <div class="rank-header">
+            <div class="rank-medal">${medal}</div>
+            <div class="rank-info">
+              <div class="rank-name">${key}</div>
+              <div class="rank-summary">${c.summary}</div>
+            </div>
+            <div class="rank-score-wrap">
+              <div class="rank-score ${scoreClass}">${c.score}</div>
+              <div class="rank-score-label">/ 100</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${c.score}%"></div></div>
+          <div class="rank-details">
+            <div class="detail-box"><div class="detail-label">Matching Skills</div><div class="detail-tags">${matches}</div></div>
+            <div class="detail-box"><div class="detail-label">Missing Skills</div><div class="detail-tags">${missing}</div></div>
+          </div>
+          ${currentScreeningId?`
+          <div class="note-area">
+            <div class="detail-label" style="margin-bottom:6px;">Notes</div>
+            <textarea class="note-input" id="note_${i}" placeholder="Add notes about this candidate..."></textarea>
+            <button class="note-save" onclick="saveNote(${i},'${key}')">Save Note</button>
+            <div class="note-saved" id="noteSaved_${i}">✓ Saved</div>
+          </div>`:''}
+        </div>`;
+    }).join('');
+
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({behavior:'smooth'});
+  }
+
+  // SAVE NOTE
+  async function saveNote(index,candidate) {
+    if(!currentScreeningId) return;
+    const note=document.getElementById(`note_${index}`).value;
+    try {
+      await fetch('/save_note',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({screening_id:currentScreeningId,candidate,note})});
+      const saved=document.getElementById(`noteSaved_${index}`);
+      saved.style.display='block';
+      setTimeout(()=>saved.style.display='none',2000);
+    } catch(e){}
+  }
+
+  // EXPORT PDF
+  async function exportPDF() {
+    if(!currentResults.length) return;
+    try {
+      const response=await fetch('/export_pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({results:currentResults,job_desc:currentJobDesc})});
+      if(!response.ok){showError('Could not generate PDF.');return;}
+      const blob=await response.blob();
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download='screening_report.pdf';a.click();
+      URL.revokeObjectURL(url);
+    } catch(e){alert('Error generating PDF');}
+  }
+
+  function showError(msg) {
+    const box=document.getElementById('errorBox');
+    box.textContent='⚠️ '+msg;
+    box.classList.add('show');
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('screenBtn').disabled=false;
+  }
+</script>
+</body>
+</html>

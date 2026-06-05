@@ -1,0 +1,38 @@
+# Secrets & local config
+.env
+.env.local
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# Database
+*.db
+instance/
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Build / logs
+dist/
+build/
+*.egg-info/
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Matplotlib cache
+.matplotlib_cache/
