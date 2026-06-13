@@ -112,6 +112,13 @@
   .api-key-hint a { color: var(--accent2); text-decoration: none; font-weight: 500; }
   .api-key-hint a:hover { text-decoration: underline; }
 
+  /* HOW IT WORKS TOOLTIP */
+  .how-it-works { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--text3); cursor: pointer; border: none; background: none; font-family: 'DM Sans', sans-serif; padding: 0; transition: color 0.2s; }
+  .how-it-works:hover { color: var(--accent2); }
+  .how-it-works-panel { display: none; margin-top: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; font-size: 12px; color: var(--text2); line-height: 1.7; }
+  .how-it-works-panel.show { display: block; }
+  .how-it-works-panel strong { color: var(--text); }
+
   /* TEMPLATES */
   .template-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 12px; }
   .template-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
@@ -124,6 +131,8 @@
   .upload-icon { font-size: 28px; color: var(--accent); }
   .upload-text { font-size: 14px; font-weight: 500; color: var(--text2); }
   .upload-sub { font-size: 12px; color: var(--text3); }
+  .upload-formats { display: flex; gap: 6px; justify-content: center; margin-top: 4px; }
+  .upload-format-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); letter-spacing: 0.5px; }
   .file-list { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
   .file-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 100px; padding: 4px 10px 4px 12px; font-size: 12px; color: var(--accent); font-weight: 500; }
   .file-chip-remove { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; opacity: 0.7; }
@@ -154,7 +163,7 @@
 
   /* CHART */
   .chart-wrap { margin-bottom: 24px; }
-  .chart-img { width: 100%; border-radius: 12px; }
+  .chart-img { width: 100%; border-radius: 12px; display: block; }
 
   /* RANK CARD */
   .rank-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; position: relative; overflow: hidden; transition: all 0.2s; animation: fadeUp 0.4s ease forwards; opacity: 0; }
@@ -221,71 +230,23 @@
   .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
   body.light {
-    --bg: #f0f4f8;
-    --surface: #ffffff;
-    --surface2: #f8fafc;
-    --border: #d8e0ea;
-    --accent: #0d9488;
-    --accent-hover: #0f766e;
-    --accent2: #2563eb;
-    --accent3: #dc2626;
-    --accent4: #b45309;
-    --text: #0f172a;
-    --text2: #475569;
-    --text3: #64748b;
-    --on-accent: #ffffff;
-    --shadow: rgba(15, 23, 42, 0.06);
-    --shadow-lg: rgba(15, 23, 42, 0.1);
-    --overlay: rgba(15, 23, 42, 0.45);
-    --glow-1: rgba(13, 148, 136, 0.12);
-    --glow-2: rgba(37, 99, 235, 0.1);
-    --chip-bg: rgba(13, 148, 136, 0.1);
-    --chip-border: rgba(13, 148, 136, 0.28);
-    --banner-bg: rgba(37, 99, 235, 0.08);
-    --banner-border: rgba(37, 99, 235, 0.22);
-    --tag-match-bg: rgba(13, 148, 136, 0.12);
-    --tag-miss-bg: rgba(220, 38, 38, 0.1);
-    --upload-hover: rgba(13, 148, 136, 0.06);
+    --bg: #f0f4f8; --surface: #ffffff; --surface2: #f8fafc; --border: #d8e0ea;
+    --accent: #0d9488; --accent-hover: #0f766e; --accent2: #2563eb; --accent3: #dc2626;
+    --accent4: #b45309; --text: #0f172a; --text2: #475569; --text3: #64748b;
+    --on-accent: #ffffff; --shadow: rgba(15, 23, 42, 0.06); --shadow-lg: rgba(15, 23, 42, 0.1);
+    --overlay: rgba(15, 23, 42, 0.45); --glow-1: rgba(13, 148, 136, 0.12);
+    --glow-2: rgba(37, 99, 235, 0.1); --chip-bg: rgba(13, 148, 136, 0.1);
+    --chip-border: rgba(13, 148, 136, 0.28); --banner-bg: rgba(37, 99, 235, 0.08);
+    --banner-border: rgba(37, 99, 235, 0.22); --tag-match-bg: rgba(13, 148, 136, 0.12);
+    --tag-miss-bg: rgba(220, 38, 38, 0.1); --upload-hover: rgba(13, 148, 136, 0.06);
   }
-
-  body.light .card {
-    box-shadow: 0 4px 24px var(--shadow), 0 1px 2px rgba(15, 23, 42, 0.04);
-  }
-
-  body.light .rank-card {
-    box-shadow: 0 2px 12px var(--shadow);
-  }
-
-  body.light .mode-badge.local {
-    background: rgba(37, 99, 235, 0.1);
-    color: #1d4ed8;
-    border-color: rgba(37, 99, 235, 0.25);
-  }
-
-  body.light .mode-badge.ai {
-    background: rgba(13, 148, 136, 0.1);
-    color: #0f766e;
-    border-color: rgba(13, 148, 136, 0.25);
-  }
-
-  body.light .warn-box {
-    background: rgba(180, 83, 9, 0.08);
-    border-color: rgba(180, 83, 9, 0.25);
-    color: #b45309;
-  }
-
-  body.light .error-box {
-    background: rgba(220, 38, 38, 0.06);
-    border-color: rgba(220, 38, 38, 0.2);
-    color: #b91c1c;
-  }
-
-  body.light .chart-wrap {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 8px;
-  }
+  body.light .card { box-shadow: 0 4px 24px var(--shadow), 0 1px 2px rgba(15, 23, 42, 0.04); }
+  body.light .rank-card { box-shadow: 0 2px 12px var(--shadow); }
+  body.light .mode-badge.local { background: rgba(37, 99, 235, 0.1); color: #1d4ed8; border-color: rgba(37, 99, 235, 0.25); }
+  body.light .mode-badge.ai { background: rgba(13, 148, 136, 0.1); color: #0f766e; border-color: rgba(13, 148, 136, 0.25); }
+  body.light .warn-box { background: rgba(180, 83, 9, 0.08); border-color: rgba(180, 83, 9, 0.25); color: #b45309; }
+  body.light .error-box { background: rgba(220, 38, 38, 0.06); border-color: rgba(220, 38, 38, 0.2); color: #b91c1c; }
+  body.light .chart-wrap { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 8px; }
 
   /* FOOTER */
   .footer { text-align: center; padding: 40px 0 20px; color: var(--text3); font-size: 13px; }
@@ -294,7 +255,7 @@
 </style>
 </head>
 <body>
-<div class="app" id="appRoot" data-guest-limit="{{ guest_attempts_limit|default(2) }}">
+<div class="app" id="appRoot" data-guest-limit="{{ guest_attempts_limit|default(5) }}">
 
   <!-- AUTH MODAL -->
   <div class="modal-overlay" id="authModal">
@@ -348,10 +309,10 @@
     <p>Upload resumes and a job description — ranks the best candidates instantly</p>
   </div>
 
-  <!-- LOGIN / TRIAL BANNER -->
+  <!-- FIX 3: Better free tier messaging -->
   <div class="login-banner" id="loginBanner">
     <div class="login-banner-text" id="loginBannerText">
-      <span id="trialCount">2</span> free screenings left — then <span>sign up</span> to continue
+      <span id="trialCount">5</span> free screenings — no account needed. <span>Sign up</span> for unlimited access &amp; history.
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn-nav outline" onclick="openModal('login')">Sign In</button>
@@ -359,23 +320,38 @@
     </div>
   </div>
 
-  <!-- API CONFIGURATION (optional) -->
+  <!-- FIX 4: Skill matching explanation with "How it works" toggle -->
   <div class="card api-config-card">
     <div class="card-title">API Configuration</div>
-    <p class="api-key-hint" style="margin-bottom:14px;">
-      Screening works <strong style="color:var(--text);">without any API key</strong> using local skill matching.
-      Enable AI below only if you want smarter OpenAI analysis (uses your own key &amp; credits).
+    <p class="api-key-hint" style="margin-bottom:6px;">
+      Screening works <strong style="color:var(--text);">without any API key</strong> using built-in skill matching —
+      no account or credits needed.
     </p>
-    <label class="api-toggle-row">
-      <input type="checkbox" id="useAi" onchange="toggleAiFields()">
-      <span class="api-toggle-label">Use AI screening (OpenAI — optional)</span>
-    </label>
-    <div class="api-fields" id="apiFields">
-      <label for="apiKey">OpenAI API Key</label>
-      <input type="password" id="apiKey" class="form-input" placeholder="sk-..." autocomplete="off">
-      <p class="api-key-hint">
-        <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">Get your API key →</a>
-      </p>
+    <button class="how-it-works" onclick="toggleHowItWorks()">
+      <span>ℹ️</span> How does skill matching work?
+    </button>
+    <div class="how-it-works-panel" id="howItWorksPanel">
+      <strong>Local Skill Matching</strong> extracts skills and keywords from your job description,
+      then scores each resume by how many of those skills appear in it. It checks 60+ tech skills
+      (Python, React, TensorFlow, etc.), experience years, and degree requirements — giving each
+      candidate a score out of 100. No data leaves your browser. Fast, free, private.
+      <br><br>
+      <strong>AI Screening (optional)</strong> uses OpenAI's GPT model for deeper semantic
+      understanding — useful when resumes use different wording for the same skill.
+      Requires your own OpenAI API key.
+    </div>
+    <div style="margin-top:14px;">
+      <label class="api-toggle-row">
+        <input type="checkbox" id="useAi" onchange="toggleAiFields()">
+        <span class="api-toggle-label">Use AI screening (OpenAI — optional)</span>
+      </label>
+      <div class="api-fields" id="apiFields">
+        <label for="apiKey">OpenAI API Key</label>
+        <input type="password" id="apiKey" class="form-input" placeholder="sk-..." autocomplete="off">
+        <p class="api-key-hint">
+          <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">Get your API key →</a>
+        </p>
+      </div>
     </div>
   </div>
 
@@ -393,11 +369,15 @@
     </div>
     <div class="card">
       <div class="card-title">Upload Resumes</div>
+      <!-- FIX 2: Better upload UX with format badges and clearer text -->
       <div class="upload-area" id="uploadArea">
-        <input type="file" id="fileInput" multiple accept=".pdf,.docx" onchange="handleFiles(this.files)">
-        <div class="upload-icon">↑</div>
-        <div class="upload-text">Drag & drop PDF or DOCX resumes here</div>
-        <div class="upload-sub">or click to browse · Multiple files supported</div>
+        <input type="file" id="fileInput" multiple accept=".pdf" onchange="handleFiles(this.files)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Drop resumes here or click to browse</div>
+        <div class="upload-sub">Select multiple files at once — all processed together</div>
+        <div class="upload-formats">
+          <span class="upload-format-tag">PDF</span>
+        </div>
       </div>
       <div class="file-list" id="fileList"></div>
     </div>
@@ -414,7 +394,7 @@
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <div class="loading-text">Analyzing resumes...</div>
-    <div class="loading-sub" id="loadingSub">Usually a few seconds (no API key needed)</div>
+    <div class="loading-sub" id="loadingSub">Usually a few seconds — no API key needed</div>
   </div>
 
   <!-- RESULTS -->
@@ -427,9 +407,10 @@
         <button class="btn-export" onclick="exportPDF()">Download PDF Report</button>
       </div>
     </div>
+    <!-- FIX 1: chart only shown when src is valid base64 data -->
     <div class="chart-wrap card" id="chartWrap" style="display:none;">
       <div class="card-title">Score Chart</div>
-      <img id="chartImg" class="chart-img" src="" alt="Score Chart">
+      <img id="chartImg" class="chart-img" alt="Score Chart">
     </div>
     <div id="resultsList"></div>
   </div>
@@ -457,25 +438,23 @@
   let currentJobDesc = '';
   let currentScreeningId = null;
   let allHistory = [];
-  const GUEST_ATTEMPT_LIMIT = parseInt(document.getElementById('appRoot').dataset.guestLimit || '2', 10);
+  const GUEST_ATTEMPT_LIMIT = parseInt(document.getElementById('appRoot').dataset.guestLimit || '5', 10);
   let guestAttemptsRemaining = GUEST_ATTEMPT_LIMIT;
   let pendingVerifyEmail = '';
 
   // THEME
-  function themeIcon() {
-    return document.body.classList.contains('light') ? '🌙' : '☀️';
-  }
-  function syncThemeToggles() {
-    document.querySelectorAll('.theme-toggle').forEach(btn => { btn.textContent = themeIcon(); });
-  }
+  function themeIcon() { return document.body.classList.contains('light') ? '🌙' : '☀️'; }
+  function syncThemeToggles() { document.querySelectorAll('.theme-toggle').forEach(btn => { btn.textContent = themeIcon(); }); }
   function toggleTheme() {
     document.body.classList.toggle('light');
     localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
     syncThemeToggles();
   }
-  if (localStorage.getItem('theme') === 'light') {
-    document.body.classList.add('light');
-    syncThemeToggles();
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light'); syncThemeToggles(); }
+
+  // FIX 4: How it works toggle
+  function toggleHowItWorks() {
+    document.getElementById('howItWorksPanel').classList.toggle('show');
   }
 
   function toggleAiFields() {
@@ -487,7 +466,6 @@
   const apiKeyInput = document.getElementById('apiKey');
   const useAiCheckbox = document.getElementById('useAi');
   if (localStorage.getItem('openai_api_key')) apiKeyInput.value = localStorage.getItem('openai_api_key');
-  // Always start in free local mode (no OpenAI)
   useAiCheckbox.checked = false;
   toggleAiFields();
   apiKeyInput.addEventListener('change', () => {
@@ -503,9 +481,9 @@
     frontend: `We are looking for a Frontend Developer.\nRequirements:\n- HTML, CSS, JavaScript\n- React or Vue.js\n- Responsive design\n- REST API integration\n- Git version control`,
     data: `We are looking for a Data Analyst.\nRequirements:\n- Python or R programming\n- SQL and database querying\n- Data visualization (Tableau, Power BI)\n- Statistical analysis`
   };
-
   function loadTemplate(type) { document.getElementById('jobDesc').value = templates[type]; }
 
+  // FIX 3: Better banner messaging
   function updateGuestBanner(remaining) {
     if (currentUser) return;
     guestAttemptsRemaining = remaining;
@@ -520,21 +498,21 @@
       text.innerHTML = 'Free trial ended — <span>register or sign in</span> to screen more resumes';
       return;
     }
-    text.innerHTML = `<span>${remaining}</span> free screening${remaining > 1 ? 's' : ''} left — then <span>sign up</span> to continue`;
+    if (remaining === GUEST_ATTEMPT_LIMIT) {
+      text.innerHTML = `<span>${remaining}</span> free screenings — no account needed. <span>Sign up</span> for unlimited access &amp; history.`;
+    } else {
+      text.innerHTML = `<span>${remaining}</span> free screening${remaining > 1 ? 's' : ''} left — <span>sign up</span> to continue with unlimited access.`;
+    }
   }
 
   async function refreshGuestStatus() {
     try {
       const res = await fetch('/guest_status');
       const data = await res.json();
-      if (data.logged_in && data.name) {
-        setLoggedIn(data.name);
-        return;
-      }
+      if (data.logged_in && data.name) { setLoggedIn(data.name); return; }
       updateGuestBanner(data.attempts_remaining);
     } catch (e) {}
   }
-
   refreshGuestStatus();
 
   // AUTH
@@ -572,24 +550,13 @@
     const code = document.getElementById('verifyCode').value.trim();
     const err = document.getElementById('authError');
     const ok = document.getElementById('authSuccess');
-    if (!pendingVerifyEmail || code.length < 6) {
-      err.textContent = 'Enter the 6-digit code from your email';
-      err.style.display = 'block';
-      return;
-    }
+    if (!pendingVerifyEmail || code.length < 6) { err.textContent='Enter the 6-digit code from your email'; err.style.display='block'; return; }
     try {
-      const res = await fetch('/verify_email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: pendingVerifyEmail, code }),
-      });
+      const res = await fetch('/verify_email', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:pendingVerifyEmail, code}) });
       const data = await res.json();
-      if (data.error) { err.textContent = data.error; err.style.display = 'block'; ok.style.display = 'none'; return; }
-      setLoggedIn(data.name);
-      pendingVerifyEmail = '';
-      closeModal();
-      refreshGuestStatus();
-    } catch (e) { err.textContent = 'Connection error'; err.style.display = 'block'; }
+      if (data.error) { err.textContent=data.error; err.style.display='block'; ok.style.display='none'; return; }
+      setLoggedIn(data.name); pendingVerifyEmail=''; closeModal(); refreshGuestStatus();
+    } catch (e) { err.textContent='Connection error'; err.style.display='block'; }
   }
 
   async function resendVerification() {
@@ -597,19 +564,13 @@
     const err = document.getElementById('authError');
     const ok = document.getElementById('authSuccess');
     try {
-      const res = await fetch('/resend_verification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: pendingVerifyEmail }),
-      });
+      const res = await fetch('/resend_verification', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:pendingVerifyEmail}) });
       const data = await res.json();
-      if (data.error) { err.textContent = data.error; err.style.display = 'block'; return; }
+      if (data.error) { err.textContent=data.error; err.style.display='block'; return; }
       let msg = data.message || 'New code sent.';
       if (data.dev_code) msg += ` Dev code: ${data.dev_code}`;
-      ok.textContent = msg;
-      ok.style.display = 'block';
-      err.style.display = 'none';
-    } catch (e) { err.textContent = 'Connection error'; err.style.display = 'block'; }
+      ok.textContent=msg; ok.style.display='block'; err.style.display='none';
+    } catch (e) { err.textContent='Connection error'; err.style.display='block'; }
   }
 
   async function doLogin() {
@@ -619,10 +580,7 @@
     try {
       const res=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
       const data=await res.json();
-      if (data.verification_required) {
-        showVerifyForm(data.email, data.error || data.message, data.dev_code);
-        return;
-      }
+      if (data.verification_required) { showVerifyForm(data.email, data.error||data.message, data.dev_code); return; }
       if(data.error){err.textContent=data.error;err.style.display='block';return;}
       setLoggedIn(data.name);closeModal();refreshGuestStatus();
     } catch(e){err.textContent='Connection error';err.style.display='block';}
@@ -636,10 +594,7 @@
     try {
       const res=await fetch('/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});
       const data=await res.json();
-      if (data.verification_required) {
-        showVerifyForm(data.email, data.message, data.dev_code);
-        return;
-      }
+      if (data.verification_required) { showVerifyForm(data.email, data.message, data.dev_code); return; }
       if(data.error){err.textContent=data.error;err.style.display='block';return;}
       setLoggedIn(data.name);closeModal();refreshGuestStatus();
     } catch(e){err.textContent='Connection error';err.style.display='block';}
@@ -717,38 +672,26 @@
   function fileKey(f) { return `${f.name}|${f.size}|${f.lastModified}`; }
 
   function handleFiles(files) {
-    const incoming = Array.from(files).filter(f => {
-      const n = f.name.toLowerCase();
-      return n.endsWith('.pdf') || n.endsWith('.docx');
-    });
+    const incoming = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
     const seen = new Set(selectedFiles.map(fileKey));
-    incoming.forEach(f => {
-      const key = fileKey(f);
-      if (!seen.has(key)) {
-        selectedFiles.push(f);
-        seen.add(key);
-      }
-    });
+    incoming.forEach(f => { const key=fileKey(f); if(!seen.has(key)){selectedFiles.push(f);seen.add(key);} });
     document.getElementById('fileInput').value = '';
     renderFileList();
   }
 
-  function removeFile(index) {
-    selectedFiles.splice(index, 1);
-    renderFileList();
-  }
+  function removeFile(index) { selectedFiles.splice(index,1); renderFileList(); }
 
   function renderFileList() {
     const list = document.getElementById('fileList');
-    list.innerHTML = selectedFiles.map((f, i) => `
+    list.innerHTML = selectedFiles.map((f,i) => `
       <div class="file-chip">
         <span>${f.name}</span>
         <button type="button" class="file-chip-remove" onclick="removeFile(${i})" title="Remove">×</button>
       </div>`).join('');
     const uploadText = document.querySelector('.upload-text');
     uploadText.textContent = selectedFiles.length
-      ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} ready`
-      : 'Drag & drop PDF or DOCX resumes here';
+      ? `${selectedFiles.length} file${selectedFiles.length>1?'s':''} ready to screen`
+      : 'Drop resumes here or click to browse';
   }
 
   // SCREEN
@@ -758,10 +701,9 @@
     errorBox.classList.remove('show');
     document.getElementById('warnBox').classList.remove('show');
     if(!jobDesc){showError('Please enter a job description');return;}
-    if(!selectedFiles.length){showError('Please upload at least one PDF or DOCX resume');return;}
-    if(!currentUser && guestAttemptsRemaining !== null && guestAttemptsRemaining <= 0){
-      handleSignupRequired({error:'Free trial ended. Register or sign in to screen more resumes.'});
-      return;
+    if(!selectedFiles.length){showError('Please upload at least one PDF resume');return;}
+    if(!currentUser && guestAttemptsRemaining!==null && guestAttemptsRemaining<=0){
+      handleSignupRequired({error:'Free trial ended. Register or sign in to screen more resumes.'});return;
     }
 
     document.getElementById('screenBtn').disabled=true;
@@ -770,24 +712,21 @@
 
     const useAi = useAiCheckbox.checked;
     const apiKey = apiKeyInput.value.trim();
-    if (useAi && !apiKey) {
+    if(useAi && !apiKey){
       showError('AI mode is on — enter your OpenAI API key, or turn off "Use AI screening".');
       document.getElementById('apiFields').classList.add('show');
       apiKeyInput.focus();
-      document.getElementById('screenBtn').disabled = false;
+      document.getElementById('screenBtn').disabled=false;
       document.getElementById('loading').classList.remove('show');
       return;
     }
-    if (useAi && apiKey) localStorage.setItem('openai_api_key', apiKey);
-
-    document.getElementById('loadingSub').textContent = useAi
-      ? 'AI analysis may take 10–20 seconds'
-      : 'Local matching — usually a few seconds';
+    if(useAi && apiKey) localStorage.setItem('openai_api_key', apiKey);
+    document.getElementById('loadingSub').textContent = useAi ? 'AI analysis may take 10–20 seconds' : 'Matching skills against job description...';
 
     const formData=new FormData();
     formData.append('job_desc',jobDesc);
-    formData.append('use_ai', useAi ? '1' : '0');
-    if (useAi && apiKey) formData.append('openai_api_key', apiKey);
+    formData.append('use_ai', useAi?'1':'0');
+    if(useAi && apiKey) formData.append('openai_api_key', apiKey);
     selectedFiles.forEach(f => formData.append('resumes', f, f.name));
 
     try {
@@ -795,7 +734,7 @@
       const data=await response.json();
       if(data.signup_required){handleSignupRequired(data);return;}
       if(data.error){showError(data.error);return;}
-      if(data.attempts_remaining !== undefined && data.attempts_remaining !== null){
+      if(data.attempts_remaining!==undefined && data.attempts_remaining!==null){
         updateGuestBanner(data.attempts_remaining);
       }
       if(data.warning){
@@ -806,7 +745,7 @@
       currentResults=data.results;
       currentJobDesc=jobDesc;
       currentScreeningId=data.screening_id;
-      renderResults(data.results,data.chart,data.mode);
+      renderResults(data.results, data.chart, data.mode);
       if(currentUser) loadHistory();
     } catch(e){showError('Connection error.');}
     finally{
@@ -815,18 +754,25 @@
     }
   }
 
-  // RENDER RESULTS
-  function renderResults(results,chart,mode) {
+  // RENDER RESULTS — FIX 1: chart only shown when base64 data is valid
+  function renderResults(results, chart, mode) {
     const medals=['🥇','🥈','🥉'];
     const rankClass=['rank-1','rank-2','rank-3'];
-    const modeLabel = mode === 'ai' ? 'AI analysis' : 'Local matching (no API key)';
-    const modeClass = mode === 'ai' ? 'mode-badge ai' : 'mode-badge local';
+    const modeLabel = mode==='ai' ? 'AI analysis' : 'Skill matching';
+    const modeClass = mode==='ai' ? 'mode-badge ai' : 'mode-badge local';
     document.getElementById('resultsCount').innerHTML =
       `<span class="${modeClass}">${modeLabel}</span> · ${results.length} candidate${results.length>1?'s':''} ranked`;
 
-    if(chart){
-      document.getElementById('chartImg').src=`data:image/png;base64,${chart}`;
-      document.getElementById('chartWrap').style.display='block';
+    // FIX 1: Only show chart when we have valid base64 data
+    const chartWrap = document.getElementById('chartWrap');
+    const chartImg = document.getElementById('chartImg');
+    if(chart && chart.length > 100) {
+      chartImg.src = `data:image/png;base64,${chart}`;
+      chartImg.onload = () => { chartWrap.style.display = 'block'; };
+      chartImg.onerror = () => { chartWrap.style.display = 'none'; };
+    } else {
+      chartWrap.style.display = 'none';
+      chartImg.src = '';
     }
 
     document.getElementById('resultsList').innerHTML=results.map((c,i)=>{
@@ -868,7 +814,6 @@
     document.getElementById('results').scrollIntoView({behavior:'smooth'});
   }
 
-  // SAVE NOTE
   async function saveNote(index,candidate) {
     if(!currentScreeningId) return;
     const note=document.getElementById(`note_${index}`).value;
@@ -880,7 +825,6 @@
     } catch(e){}
   }
 
-  // EXPORT PDF
   async function exportPDF() {
     if(!currentResults.length) return;
     try {
