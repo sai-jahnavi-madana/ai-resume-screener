@@ -227,7 +227,47 @@ COMMON_SKILLS = [
     'object-oriented', 'oop', 'api', 'microservices', 'etl', 'data analysis', 'data visualization',
     'statistics', 'computer vision', 'generative ai', 'llm', 'openai', 'bert', 'transformers',
 ]
+DEGREE_KEYWORDS = {
+    'phd': ['phd', 'ph.d', 'doctorate'],
+    'masters': ['m.tech', 'mtech', 'm.s', 'ms ', 'mca', 'mba', 'master of', 'masters'],
+    'bachelors': ['b.tech', 'btech', 'b.e', 'b.sc', 'bsc', 'bca', 'bachelor of', 'bachelors'],
+}
 
+def extract_experience_years(text):
+    text_lower = text.lower()
+    patterns = [
+        r'(\d+(?:\.\d+)?)\+?\s*(?:years|yrs|year)\s*(?:of)?\s*experience',
+        r'experience\s*(?:of)?\s*(\d+(?:\.\d+)?)\+?\s*(?:years|yrs|year)',
+    ]
+    years_found = []
+    for p in patterns:
+        for m in re.findall(p, text_lower):
+            try:
+                years_found.append(float(m))
+            except ValueError:
+                continue
+    return max(years_found) if years_found else None
+
+def extract_required_experience(job_desc):
+    return extract_experience_years(job_desc)
+
+def detect_highest_degree(text):
+    text_lower = text.lower()
+    for level in ['phd', 'masters', 'bachelors']:
+        for kw in DEGREE_KEYWORDS[level]:
+            if kw in text_lower:
+                return level
+    return None
+
+def degree_meets_requirement(job_desc, resume_text):
+    rank = {'bachelors': 1, 'masters': 2, 'phd': 3}
+    jd_degree = detect_highest_degree(job_desc)
+    if not jd_degree:
+        return True, None
+    resume_degree = detect_highest_degree(resume_text)
+    if not resume_degree:
+        return False, jd_degree
+    return rank.get(resume_degree, 0) >= rank.get(jd_degree, 0), jd_degree
 def find_skills_in_text(text):
     text_lower = text.lower()
     found = []
