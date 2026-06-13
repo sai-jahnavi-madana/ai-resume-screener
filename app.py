@@ -337,63 +337,84 @@ def friendly_openai_error(exc):
     return 'OpenAI request failed. Check your API key and billing, then try again.'
 
 # ── AI RANKING ──
-def rank_resumes(job_desc, resumes_dict, api_key):
-    client = openai.OpenAI(api_key=api_key)
-    resumes_text = ""
-    for name, text in resumes_dict.items():
-        resumes_text += f"\n\n--- RESUME: {name} ---\n{text[:1500]}"
+def rank_resumes_local(job_desc, resumes_dict):
+    job_skills = find_skills_in_text(job_desc)
+    job_keywords = list(dict.fromkeys(extract_keywords(job_desc)))
+    criteria = job_skills if job_skills else job_keywords[:40]
+    required_exp = extract_required_experience(job_desc)
 
-    prompt = f"""
-You are an expert HR recruiter. Analyze these resumes against the job description and rank them.
+    results = []
+    for name, resume_text in resumes_dict.items():
+        resume_lower = resume_text.lower()
+        resume_skills = find_skills_in_text(resume_text)
 
-JOB DESCRIPTION:
-{job_desc}
+        if criteria and job_skills:
+            matched = [s for s in job_skills if s in resume_skills or s in resume_lower]
+            matched = list(dict.fromkeys(matched))
+            missing = [s for s in job_skills if s not in matched][:5]
+            skill_score = (len(matched) / len(job_skills) * 100) if job_skills else 50
+        elif criteria:
+            matched = [k for k in criteria if k in resume_lower]
+            matched = list(dict.fromkeys(matched))
+            missing = [k for k in criteria if k not in matched][:5]
+            skill_score = (len(matched) / len(criteria) * 100) if criteria else 50
+        else:
+            matched, missing, skill_score = [], [], 50
 
-RESUMES:
-{resumes_text}
+        candidate_exp = extract_experience_years(resume_text)
+        exp_note = None
+        exp_score = 100
+        if required_exp is not None:
+            if candidate_exp is None:
+                exp_score = 70
+                exp_note = f'{required_exp:g}+ yrs required (resume experience not detected)'
+            elif candidate_exp >= required_exp:
+                exp_score = 100
+                exp_note = f'Meets experience requirement ({candidate_exp:g} yrs >= {required_exp:g} yrs)'
+            else:
+                shortfall = required_exp - candidate_exp
+                exp_score = max(40, 100 - shortfall * 20)
+                exp_note = f'Below required experience ({candidate_exp:g} yrs < {required_exp:g} yrs)'
 
-For each resume provide:
-1. Candidate name (use filename)
-2. Match score (0-100)
-3. Top 3 matching skills
-4. Top 2 missing skills
-5. One line summary
+        edu_ok, jd_degree = degree_meets_requirement(job_desc, resume_text)
+        edu_score = 100
+        edu_note = None
+        if jd_degree:
+            if edu_ok:
+                edu_note = f'Meets education requirement ({jd_degree.title()})'
+            else:
+                edu_score = 70
+                edu_note = f'Below required education ({jd_degree.title()} preferred)'
 
-Return as structured text like:
-CANDIDATE: filename
-SCORE: 85
-MATCHES: Python, Machine Learning, NLP
-MISSING: Docker, AWS
-SUMMARY: Strong ML background with relevant experience
+        if required_exp is not None or jd_degree:
+            final_score = round(skill_score * 0.7 + exp_score * 0.2 + edu_score * 0.1)
+        else:
+            final_score = round(skill_score)
+        final_score = max(0, min(100, final_score))
 
-Rank from highest to lowest score.
-"""
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        max_tokens=1500,
-        messages=[
-            {"role": "system", "content": "You are an expert HR recruiter."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    return response.choices[0].message.content
+        matches_str = ', '.join(s.title() for s in matched[:5]) or 'Limited keyword overlap'
+        missing_str = ', '.join(s.title() for s in missing[:3]) or 'None identified'
 
-# ── PARSE RESULTS ──
-def parse_results(raw_text):
-    candidates = []
-    blocks = raw_text.strip().split("CANDIDATE:")
-    for block in blocks[1:]:
-        try:
-            lines = block.strip().split("\n")
-            name = lines[0].strip()
-            score = int([l for l in lines if l.startswith("SCORE:")][0].replace("SCORE:","").strip())
-            matches = [l for l in lines if l.startswith("MATCHES:")][0].replace("MATCHES:","").strip()
-            missing = [l for l in lines if l.startswith("MISSING:")][0].replace("MISSING:","").strip()
-            summary = [l for l in lines if l.startswith("SUMMARY:")][0].replace("SUMMARY:","").strip()
-            candidates.append({"name":name,"score":score,"matches":matches,"missing":missing,"summary":summary})
-        except:
-            continue
-    return sorted(candidates, key=lambda x: x["score"], reverse=True)
+        if final_score >= 70:
+            summary = f'Strong skill match — {len(matched)} job requirements found in resume.'
+        elif final_score >= 50:
+            summary = f'Moderate match — {len(matched)} overlapping skills/keywords.'
+        else:
+            summary = f'Weak match — only {len(matched)} requirements found in resume.'
+
+        extra_notes = [n for n in [exp_note, edu_note] if n]
+        if extra_notes:
+            summary += ' ' + ' '.join(extra_notes) + '.'
+
+        results.append({
+            'name': name,
+            'score': final_score,
+            'matches': matches_str,
+            'missing': missing_str,
+            'summary': summary,
+        })
+
+    return sorted(results, key=lambda x: x['score'], reverse=True)
 
 # ── GENERATE CHART ──
 def generate_chart(results):
