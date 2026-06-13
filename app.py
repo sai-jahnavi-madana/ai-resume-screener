@@ -49,7 +49,8 @@ if os.getenv('FLASK_ENV') == 'production':
 
 db = SQLAlchemy(app)
 
-GUEST_FREE_ATTEMPTS = int(os.getenv('GUEST_FREE_ATTEMPTS', '2'))
+# FIX 1: Increased from 2 → 5 free screenings
+GUEST_FREE_ATTEMPTS = int(os.getenv('GUEST_FREE_ATTEMPTS', '5'))
 BLACK = HexColor('#000000')
 WHITE = HexColor('#FFFFFF')
 LIGHT_ROW = HexColor('#F5F5F5')
@@ -195,7 +196,7 @@ def extract_text(pdf_file):
     except:
         return ""
 
-# ── API KEY (user-provided on website, optional .env fallback for local dev) ──
+# ── API KEY ──
 def resolve_openai_api_key(form_value=None):
     key = (form_value or '').strip()
     if key:
@@ -206,7 +207,7 @@ def resolve_openai_api_key(form_value=None):
         return key
     return (os.getenv('OPENAI_API_KEY') or '').strip()
 
-# ── LOCAL RANKING (no API key) ──
+# ── LOCAL RANKING ──
 STOPWORDS = {
     'a', 'an', 'the', 'and', 'or', 'for', 'with', 'in', 'on', 'at', 'to', 'of', 'is', 'are',
     'was', 'be', 'by', 'as', 'from', 'that', 'this', 'we', 'you', 'our', 'will', 'have', 'has',
@@ -268,6 +269,7 @@ def degree_meets_requirement(job_desc, resume_text):
     if not resume_degree:
         return False, jd_degree
     return rank.get(resume_degree, 0) >= rank.get(jd_degree, 0), jd_degree
+
 def find_skills_in_text(text):
     text_lower = text.lower()
     found = []
@@ -280,63 +282,6 @@ def extract_keywords(text):
     tokens = re.findall(r'[a-zA-Z][a-zA-Z0-9+#.]{1,}', text.lower())
     return [t for t in tokens if len(t) >= 3 and t not in STOPWORDS]
 
-def rank_resumes_local(job_desc, resumes_dict):
-    job_skills = find_skills_in_text(job_desc)
-    job_keywords = list(dict.fromkeys(extract_keywords(job_desc)))
-    criteria = job_skills if job_skills else job_keywords[:40]
-
-    results = []
-    for name, resume_text in resumes_dict.items():
-        resume_lower = resume_text.lower()
-        resume_skills = find_skills_in_text(resume_text)
-
-        if criteria and job_skills:
-            matched = [s for s in job_skills if s in resume_skills or s in resume_lower]
-            matched = list(dict.fromkeys(matched))
-            missing = [s for s in job_skills if s not in matched][:5]
-            score = min(100, round(len(matched) / len(job_skills) * 100)) if job_skills else 50
-        elif criteria:
-            matched = [k for k in criteria if k in resume_lower]
-            matched = list(dict.fromkeys(matched))
-            missing = [k for k in criteria if k not in matched][:5]
-            score = min(100, round(len(matched) / len(criteria) * 100)) if criteria else 50
-        else:
-            matched, missing, score = [], [], 50
-
-        matches_str = ', '.join(s.title() for s in matched[:5]) or 'Limited keyword overlap'
-        missing_str = ', '.join(s.title() for s in missing[:3]) or 'None identified'
-        if score >= 70:
-            summary = f'Strong skill match — {len(matched)} job requirements found in resume.'
-        elif score >= 50:
-            summary = f'Moderate match — {len(matched)} overlapping skills/keywords.'
-        else:
-            summary = f'Weak match — only {len(matched)} requirements found in resume.'
-
-        results.append({
-            'name': name,
-            'score': score,
-            'matches': matches_str,
-            'missing': missing_str,
-            'summary': summary,
-        })
-
-    return sorted(results, key=lambda x: x['score'], reverse=True)
-
-# ── OPENAI ERROR MESSAGES ──
-def friendly_openai_error(exc):
-    msg = str(exc).lower()
-    if 'insufficient_quota' in msg or 'exceeded your current quota' in msg:
-        return (
-            'This OpenAI API key has no credits left. Add payment or credits at '
-            'platform.openai.com/account/billing, or paste a different API key above.'
-        )
-    if 'rate_limit' in msg or 'error code: 429' in msg:
-        return 'OpenAI rate limit reached. Wait a minute and try again, or use another API key.'
-    if 'invalid_api_key' in msg or 'incorrect api key' in msg:
-        return 'Invalid API key. Create a new one at platform.openai.com/api-keys'
-    return 'OpenAI request failed. Check your API key and billing, then try again.'
-
-# ── AI RANKING ──
 def rank_resumes_local(job_desc, resumes_dict):
     job_skills = find_skills_in_text(job_desc)
     job_keywords = list(dict.fromkeys(extract_keywords(job_desc)))
@@ -416,6 +361,20 @@ def rank_resumes_local(job_desc, resumes_dict):
 
     return sorted(results, key=lambda x: x['score'], reverse=True)
 
+# ── OPENAI ERROR MESSAGES ──
+def friendly_openai_error(exc):
+    msg = str(exc).lower()
+    if 'insufficient_quota' in msg or 'exceeded your current quota' in msg:
+        return (
+            'This OpenAI API key has no credits left. Add payment or credits at '
+            'platform.openai.com/account/billing, or paste a different API key above.'
+        )
+    if 'rate_limit' in msg or 'error code: 429' in msg:
+        return 'OpenAI rate limit reached. Wait a minute and try again, or use another API key.'
+    if 'invalid_api_key' in msg or 'incorrect api key' in msg:
+        return 'Invalid API key. Create a new one at platform.openai.com/api-keys'
+    return 'OpenAI request failed. Check your API key and billing, then try again.'
+
 # ── GENERATE CHART ──
 def generate_chart(results):
     names = [r['name'].replace('.pdf','')[:15] for r in results]
@@ -448,7 +407,7 @@ def generate_chart(results):
     plt.close()
     return chart_b64
 
-# ── GENERATE PDF (clean black text on white) ──
+# ── GENERATE PDF ──
 def generate_pdf_report(results, job_desc):
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -746,7 +705,6 @@ def screen():
             }), 400
 
         use_ai = request.form.get('use_ai', '').lower() in ('1', 'true', 'yes', 'on')
-        # Only use the key sent in this request — never .env or session (avoids surprise billing errors)
         api_key = (request.form.get('openai_api_key') or '').strip() if use_ai else ''
         warning = None
         mode = 'local'
