@@ -394,9 +394,9 @@
     <div class="card">
       <div class="card-title">Upload Resumes</div>
       <div class="upload-area" id="uploadArea">
-        <input type="file" id="fileInput" multiple accept=".pdf" onchange="handleFiles(this.files)">
+        <input type="file" id="fileInput" multiple accept=".pdf,.docx" onchange="handleFiles(this.files)">
         <div class="upload-icon">↑</div>
-        <div class="upload-text">Drag & drop PDFs here</div>
+        <div class="upload-text">Drag & drop PDF or DOCX resumes here</div>
         <div class="upload-sub">or click to browse · Multiple files supported</div>
       </div>
       <div class="file-list" id="fileList"></div>
@@ -717,7 +717,10 @@
   function fileKey(f) { return `${f.name}|${f.size}|${f.lastModified}`; }
 
   function handleFiles(files) {
-    const incoming = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+    const incoming = Array.from(files).filter(f => {
+      const n = f.name.toLowerCase();
+      return n.endsWith('.pdf') || n.endsWith('.docx');
+    });
     const seen = new Set(selectedFiles.map(fileKey));
     incoming.forEach(f => {
       const key = fileKey(f);
@@ -744,8 +747,8 @@
       </div>`).join('');
     const uploadText = document.querySelector('.upload-text');
     uploadText.textContent = selectedFiles.length
-      ? `${selectedFiles.length} PDF${selectedFiles.length > 1 ? 's' : ''} ready`
-      : 'Drag & drop PDFs here';
+      ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} ready`
+      : 'Drag & drop PDF or DOCX resumes here';
   }
 
   // SCREEN
@@ -755,7 +758,7 @@
     errorBox.classList.remove('show');
     document.getElementById('warnBox').classList.remove('show');
     if(!jobDesc){showError('Please enter a job description');return;}
-    if(!selectedFiles.length){showError('Please upload at least one PDF resume');return;}
+    if(!selectedFiles.length){showError('Please upload at least one PDF or DOCX resume');return;}
     if(!currentUser && guestAttemptsRemaining !== null && guestAttemptsRemaining <= 0){
       handleSignupRequired({error:'Free trial ended. Register or sign in to screen more resumes.'});
       return;
